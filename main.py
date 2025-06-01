@@ -1,25 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Sun Jun  1 21:54:04 2025
+JSONParser
+===========
 
-@author: dev
+Author: Devvjiit Bhuyan
+Date: 2025-06-01
+
+This script provides utilities to flatten and inflate JSON structures, as well as perform
+keyword-based searches over flattened JSONs.
+
+Functions:
+- flatten_data: Flatten a nested JSON/dict.
+- inflate_data: Inflate a flattened dict back into JSON.
+- search_by_keyword: Search for keywords in keys and/or values of a flattened JSON.
 """
 
-
-from difflib import get_close_matches
 import json
-
-
-with open('./complex_json.json') as f:
-    complex_json = json.load(f)
-
+from difflib import get_close_matches
 
 SEPARATOR = '.'
 
+def flatten_data(y: dict, separator: str = SEPARATOR):
+    """Flatten a nested JSON structure into a flat dictionary.
 
-def flatten_data(y: dict,
-                 separator: str = SEPARATOR):
+    Args:
+        y (dict): The nested JSON/dict.
+        separator (str): The separator to use for concatenated keys.
+
+    Returns:
+        dict: A flat dictionary with compound keys.
+    """
     out = {}
 
     def flatten(x, name=''):
@@ -37,10 +48,16 @@ def flatten_data(y: dict,
     flatten(y)
     return out
 
+def inflate_data(flat: dict, separator: str = SEPARATOR):
+    """Inflate a flat dictionary back into a nested JSON structure.
 
-def inflate_data(flat: dict,
-                 separator: str = SEPARATOR):
+    Args:
+        flat (dict): The flattened dictionary.
+        separator (str): The separator used in the flat dictionary's keys.
 
+    Returns:
+        dict: A nested dictionary/JSON.
+    """
     def set_nested_value(d, keys, value):
         for i, key in enumerate(keys):
             if key.isdigit():
@@ -81,14 +98,25 @@ def inflate_data(flat: dict,
 
     return result
 
-
 def search_by_keyword(src: dict,
                       keyword: str,
                       case_sensitive: bool = True,
                       close_matches: bool = False,
                       keys_only: bool = False,
                       values_only: bool = False):
+    """Search a flattened dictionary for keys or values that match a given keyword.
 
+    Args:
+        src (dict): The dictionary to search in.
+        keyword (str): The keyword to search for.
+        case_sensitive (bool): Whether the search is case-sensitive.
+        close_matches (bool): Whether to use fuzzy matching.
+        keys_only (bool): Search only keys.
+        values_only (bool): Search only values.
+
+    Returns:
+        dict: Dictionary with matches in 'by_key' and/or 'by_value'.
+    """
     out = {
         "by_key": {},
         "by_value": {}
@@ -132,8 +160,11 @@ def search_by_keyword(src: dict,
 
     return out
 
-
 if __name__ == "__main__":
+
+    with open('./complex_json.json') as f:
+        complex_json = json.load(f)
+
     flattened_json = flatten_data(complex_json)
     inflated_json = inflate_data(flattened_json)
 
