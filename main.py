@@ -21,6 +21,44 @@ from difflib import get_close_matches
 
 SEPARATOR = '.'
 
+
+def split_capitals(string: str) -> list[str]:
+    """
+    Split a string by capital letters.
+
+    Example:
+    >>> split_capitals("MyStringIsAwesome")
+    ['My', 'String', 'Is', 'Awesome']
+    >>>
+    >>>
+
+    Parameters
+    ----------
+    string : str
+        The string to split.
+
+    Returns
+    -------
+    list[str]
+        list of strings, the splitted string.
+
+    """
+    # make sure not to modufy the original variable in place. That would change it globally everywhere.
+    s = string
+    splitted = []  # end result.
+    part = ''  # the part of the string to append.
+    for i in range(len(string) - 1):  # iterate.
+        part += string[i]  # add the character.
+        if string[i + 1].isupper():  # End of a word.
+            splitted.append(part)  # append the part.
+            part = ''  # Reset, new part coming!
+
+    s = s.replace(''.join(splitted), '')  # to append the last part left.
+    splitted.append(s)  # append the last part left.
+
+    return splitted  # return the result.
+
+
 def flatten_data(y: dict, separator: str = SEPARATOR):
     """Flatten a nested JSON structure into a flat dictionary.
 
@@ -47,6 +85,7 @@ def flatten_data(y: dict, separator: str = SEPARATOR):
 
     flatten(y)
     return out
+
 
 def inflate_data(flat: dict, separator: str = SEPARATOR):
     """Inflate a flat dictionary back into a nested JSON structure.
@@ -97,6 +136,7 @@ def inflate_data(flat: dict, separator: str = SEPARATOR):
         result = set_nested_value(result, keys, value)
 
     return result
+
 
 def search_by_keyword(src: dict,
                       keyword: str,
@@ -159,6 +199,7 @@ def search_by_keyword(src: dict,
             out["by_value"][key] = value
 
     return out
+
 
 if __name__ == "__main__":
 
