@@ -43,7 +43,8 @@ def split_capitals(string: str) -> list[str]:
         list of strings, the splitted string.
 
     """
-    # make sure not to modufy the original variable in place. That would change it globally everywhere.
+    # Make sure not to modify the original variable in place. 
+    # That would change it globally everywhere.
     s = string
     splitted = []  # end result.
     part = ''  # the part of the string to append.
