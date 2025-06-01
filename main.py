@@ -14,6 +14,7 @@ import json
 with open('./complex_json.json') as f:
     complex_json = json.load(f)
 
+
 SEPARATOR = '.'
 
 
