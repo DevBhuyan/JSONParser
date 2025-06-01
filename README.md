@@ -14,7 +14,7 @@
 Clone the repository and ensure you have Python 3.x installed.
 
 ```bash
-git clone https://github.com/your-username/JSONParser.git
+git clone https://github.com/DevBhuyan/JSONParser.git
 cd JSONParser
 ```
 
@@ -32,7 +32,7 @@ from main import flatten_data, inflate_data, search_by_keyword
 
 flat = flatten_data(nested_dict)
 nested = inflate_data(flat)
-search_results = search_by_keyword(flat, "policy", close_matches=True)
+search_results = search_by_keyword(flat, "source", close_matches=True)
 ```
 
 ## Example Input (`complex_json.json`)
