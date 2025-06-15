@@ -18,6 +18,19 @@ git clone https://github.com/DevBhuyan/JSONParser.git
 cd JSONParser
 ```
 
+Or download the source code using:
+
+1. `wget`
+```bash
+wget https://github.com/DevBhuyan/JSONParser/archive/refs/tags/linux-binary.zip
+```
+
+2. `curl`
+```bash
+curl -LO https://github.com/DevBhuyan/JSONParser/archive/refs/tags/linux-binary.zip
+```
+
+
 ## Usage
 Ensure you have a `complex_json.json` file in the same directory.
 
