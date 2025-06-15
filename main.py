@@ -7,60 +7,25 @@ JSONParser
 Author: Devvjiit Bhuyan
 Date: 2025-06-01
 
-This script provides utilities to flatten and inflate JSON structures, as well as perform
-keyword-based searches over flattened JSONs.
-
-Functions:
-- flatten_data: Flatten a nested JSON/dict.
-- inflate_data: Inflate a flattened dict back into JSON.
-- search_by_keyword: Search for keywords in keys and/or values of a flattened JSON.
+This script provides utilities to:
+- Flatten nested JSON/dictionaries into key-value pairs with compound keys.
+- Inflate such flattened dictionaries back into their original nested structure.
+- Perform keyword-based or multi-word query-based searches on flattened dictionaries.
 """
 
+
 import json
-from difflib import get_close_matches
-
-SEPARATOR = '.'
-
-
-def split_capitals(string: str) -> list[str]:
-    """
-    Split a string by capital letters.
-
-    Example:
-    >>> split_capitals("MyStringIsAwesome")
-    ['My', 'String', 'Is', 'Awesome']
-    >>>
-    >>>
-
-    Parameters
-    ----------
-    string : str
-        The string to split.
-
-    Returns
-    -------
-    list[str]
-        list of strings, the splitted string.
-
-    """
-    # Make sure not to modify the original variable in place. 
-    # That would change it globally everywhere.
-    s = string
-    splitted = []  # end result.
-    part = ''  # the part of the string to append.
-    for i in range(len(string) - 1):  # iterate.
-        part += string[i]  # add the character.
-        if string[i + 1].isupper():  # End of a word.
-            splitted.append(part)  # append the part.
-            part = ''  # Reset, new part coming!
-
-    s = s.replace(''.join(splitted), '')  # to append the last part left.
-    splitted.append(s)  # append the last part left.
-
-    return splitted  # return the result.
+from helpers import (
+    exists_in,
+    SEPARATOR,
+    get_close_matches,
+    set_nested_value,
+    validate_separator
+)
 
 
-def flatten_data(y: dict, separator: str = SEPARATOR):
+def flatten_data(y: dict,
+                 separator: str = SEPARATOR):
     """Flatten a nested JSON structure into a flat dictionary.
 
     Args:
@@ -70,6 +35,9 @@ def flatten_data(y: dict, separator: str = SEPARATOR):
     Returns:
         dict: A flat dictionary with compound keys.
     """
+
+    validate_separator(separator)
+
     out = {}
 
     def flatten(x, name=''):
@@ -88,7 +56,8 @@ def flatten_data(y: dict, separator: str = SEPARATOR):
     return out
 
 
-def inflate_data(flat: dict, separator: str = SEPARATOR):
+def inflate_data(flat: dict,
+                 separator: str = SEPARATOR):
     """Inflate a flat dictionary back into a nested JSON structure.
 
     Args:
@@ -98,38 +67,8 @@ def inflate_data(flat: dict, separator: str = SEPARATOR):
     Returns:
         dict: A nested dictionary/JSON.
     """
-    def set_nested_value(d, keys, value):
-        for i, key in enumerate(keys):
-            if key.isdigit():
-                key = int(key)
-                if not isinstance(d, list):
-                    d_temp = []
-                    for _ in range(max(key + 1, len(d)) if isinstance(d, list) else key + 1):
-                        d_temp.append({} if i < len(keys) - 1 else None)
-                    if isinstance(d, dict):
-                        for k, v in d.items():
-                            try:
-                                d_temp[int(k)] = v
-                            except:
-                                pass
-                    d = d_temp
-                while len(d) <= key:
-                    d.append({} if i < len(keys) - 1 else None)
-                if i == len(keys) - 1:
-                    d[key] = value
-                else:
-                    if not isinstance(d[key], dict) and not isinstance(d[key], list):
-                        d[key] = {}
-                    d[key] = set_nested_value(d[key], keys[i + 1:], value)
-                return d
-            else:
-                if i == len(keys) - 1:
-                    d[key] = value
-                else:
-                    if key not in d:
-                        d[key] = {} if not keys[i + 1].isdigit() else []
-                    d[key] = set_nested_value(d[key], keys[i + 1:], value)
-                return d
+
+    validate_separator(separator)
 
     result = {}
     for flat_key, value in flat.items():
@@ -163,30 +102,6 @@ def search_by_keyword(src: dict,
         "by_value": {}
     }
 
-    def exists_in(sups: str,
-                  subs: str,
-                  case_sensitive: bool,
-                  close_matches: bool):
-
-        if not isinstance(sups, str):
-            sups = str(sups)
-        if not isinstance(subs, str):
-            subs = str(subs)
-
-        if close_matches:
-            if len(sups.split(SEPARATOR)) > 1:
-                if get_close_matches(subs, sups.split(SEPARATOR)):
-                    return True
-            else:
-                if get_close_matches(subs, sups.split()):
-                    return True
-        elif case_sensitive:
-            return subs in sups
-        else:
-            return subs.lower() in sups.lower()
-
-        return False
-
     for key, value in src.items():
         if exists_in(key,
                      keyword,
@@ -200,6 +115,65 @@ def search_by_keyword(src: dict,
             out["by_value"][key] = value
 
     return out
+
+
+def search_by_query(query: str,
+                    src: dict,
+                    close_matches: bool = True,
+                    match_case: bool = False,
+                    n_results: int = 25):
+    """
+    Search a flattened dictionary by checking for partial or fuzzy matches of each word in the query.
+
+    Args:
+        query (str): A sentence or group of words (e.g., "document sensitive policy").
+        src (dict): Flattened JSON dictionary where search will be performed.
+        close_matches (bool): Enable fuzzy matching using difflib.
+        match_case (bool): Whether to enforce case-sensitive matches.
+        n_results (int): Maximum number of results to return. Defaults to 25.
+
+    Returns:
+        dict: A dictionary of matching entries, sorted by relevance.
+    """
+
+    words = query.strip().split()
+    results = {}
+
+    def word_in_text(word, text):
+        if not isinstance(text, str):
+            text = str(text)
+
+        if not match_case:
+            word = word.lower()
+            text = text.lower()
+
+        if close_matches:
+            tokens = []
+            key, value = text.split()
+            if SEPARATOR in key:
+                tokens += key.split(SEPARATOR)
+            else:
+                tokens += key
+            if ' ' in value:
+                tokens += value.split()
+            else:
+                tokens += value
+            return bool(get_close_matches(word, tokens))
+        else:
+            return word in text
+
+    for key, value in src.items():
+        combined_text = f"{key}:{value}"
+        score = sum(word_in_text(word, combined_text) for word in words)
+
+        if score > 0:
+            results[key] = {"value": value, "score": score}
+
+    sorted_results = dict(
+        sorted(results.items(), key=lambda item: -item[1]["score"])[:n_results]
+    )
+
+    return {k: v["value"] for k, v in sorted_results.items()}
 
 
 if __name__ == "__main__":
