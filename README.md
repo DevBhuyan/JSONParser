@@ -5,10 +5,16 @@
 ## Features
 - 🔽 Flatten deeply nested JSON into a flat dictionary.
 - 🔼 Inflate flat JSON into the original structure.
-- 🔍 Keyword search with options for:
-  - Case sensitivity
-  - Fuzzy matching (via `difflib`)
-  - Filtering by keys or values
+- 🔍 Search functionality includes:
+  - Keyword search with options for:
+    - Case sensitivity
+    - Fuzzy matching (via `difflib`)
+    - Filtering by keys or values
+  - Multi-word query search:
+    - Ranks results based on how many words match
+    - Customisable number of top results (`n_results`)
+
+---
 
 ## Installation
 Clone the repository and ensure you have Python 3.x installed.
@@ -41,11 +47,22 @@ python main.py
 
 ### Programmatic Usage
 ```python
-from main import flatten_data, inflate_data, search_by_keyword
+from main import (
+    flatten_data,
+    inflate_data,
+    search_by_keyword,
+    search_by_query
+)
 
 flat = flatten_data(nested_dict)
 nested = inflate_data(flat)
+
+# Basic keyword search
 search_results = search_by_keyword(flat, "source", close_matches=True)
+
+# Multi-word search
+query_results = search_by_query("document sensitive policy", flat, n_results=10)
+
 ```
 
 ## Example Input (`complex_json.json`)
