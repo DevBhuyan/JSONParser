@@ -36,6 +36,7 @@ wget https://github.com/DevBhuyan/JSONParser/archive/refs/tags/linux-binary.zip
 curl -LO https://github.com/DevBhuyan/JSONParser/archive/refs/tags/linux-binary.zip
 ```
 
+---
 
 ## Usage
 Ensure you have a `complex_json.json` file in the same directory.
@@ -91,5 +92,5 @@ query_results = search_by_query("document sensitive policy", flat, n_results=10)
 ## License
 MIT License
 
-## Author
-Devvjiit Bhuyan
+## Contributors
+Devvjiit Bhuyan, Dhananjoy Bhuyan
